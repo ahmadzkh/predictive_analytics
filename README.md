@@ -1,7 +1,6 @@
 # Laporan Proyek Machine Learning - Ahmad Zaky Humami
 
 ## Domain Proyek
-
 Prestasi akademik siswa menjadi indikator penting bagi sekolah, orang tua, dan pembuat kebijakan untuk memahami efektivitas proses belajar–mengajar, mengalokasikan sumber daya, serta memberikan intervensi yang tepat waktu. Sejumlah penelitian menunjukkan bahwa faktor–faktor demografis (usia, jenis kelamin), kebiasaan belajar (lama belajar per minggu, kehadiran), serta dukungan sosial (bimbingan belajar, dukungan orang tua, kegiatan ekstrakurikuler) secara signifikan mempengaruhi hasil belajar siswa (Pei, 2023; Li & Wang, 2024). Di Indonesia, riset oleh Ambarita et al. (2024) dan Mentari & Nurhaeka (2024) juga mengonfirmasi peran faktor-faktor tersebut dalam memprediksi nilai akhir siswa SD dan SMA.
 
 Mengapa Masalah Ini Harus Diselesaikan?
@@ -14,23 +13,21 @@ Mengapa Masalah Ini Harus Diselesaikan?
 
 ## Business Understanding
 ### Problem Statements
-
 1. Bagaimana memprediksi kategori klasifikasi prestasi (GradeClass: A, B, C, D, F) siswa berdasarkan atribut demografis dan perilaku akademik mereka?
 2. Faktor manakah (misal GPA, jam belajar mingguan, absensi, dukungan orang tua, partisipasi ekstrakurikuler) yang paling berpengaruh terhadap prediksi GradeClass?
 3. Seberapa andal model machine learning (misalnya XGBoost, Random Forest) dalam memprediksi GradeClass—diukur melalui metrik accuracy, F1-score, dan confusion matrix—pada data testing yang terpisah?
 
 ### Goals
-
 1. Membangun model klasifikasi yang dapat mencapai ≥ 80 % accuracy pada data testing.
 2. Melihat Faktor penting yang mempengaruhi Grade Class
 3. Mengukur precision, recall, F1-score per kelas dan menghasilkan confusion matrix.
 
+## Data Understanding
 ### Sumber Data
 Pada proyek ini, kita menggunakan **Students Performance Dataset** yang diambil dari Kaggle. Dataset ini berisi data akademik dan demografis siswa sekolah menengah atas, dengan **1.000 baris** dan **12 kolom** fitur, antara lain usia, jam belajar per minggu, jumlah absensi, nilai GPA, partisipasi dalam bimbingan belajar, dukungan orang tua, dan keterlibatan dalam berbagai kegiatan ekstrakurikuler. Anda dapat mengunduh dataset lengkap di:  
 [Students Performance Dataset – Kaggle](https://www.kaggle.com/datasets/rabieelkharoua/students-performance-dataset/data)
 
 ### Target: **GradeClass**
-
 Variabel target **GradeClass** dikonstruksi dari nilai akhir (GPA) siswa dan dikelompokkan menjadi lima kategori, yaitu:
 
 - **Grade A**: Siswa dengan GPA ≥ 3.7  
@@ -41,7 +38,6 @@ Variabel target **GradeClass** dikonstruksi dari nilai akhir (GPA) siswa dan dik
 
 Kelima kategori inilah yang menjadi **target prediksi** model klasifikasi di proyek ini.  
 
-## Exploratory Data Analysis (EDA)
 ### Deskripsi Variabel
 Variabel | Keterangan
 ----------|----------
@@ -117,7 +113,27 @@ Jumlah duplikasi:  0
 Untuk Duplikasi Data
 - Hasil yang ditampilkan adalah 0, dengan demikian data tidak ada yang ganda (dupikat)
 
+#### Konversi nilai Numeric pada Column Categorical ke Object
+```
+# Mengganti nilai number kategori ke String Keterangan
+def convert_numerical_to_object ():
+  student_df['Gender'] = student_df['Gender'].replace({1: 'Wanita', 0: 'Pria'})
+  student_df['Extracurricular'] = student_df['Extracurricular'].replace({1:'Yes', 0:'No'})
+  student_df['Tutoring'] = student_df['Tutoring'].replace({1: 'Yes', 0: 'No'})
+  student_df['Music'] = student_df['Music'].replace({1: 'Yes', 0: 'No'})
+  student_df['Sports'] = student_df['Sports'].replace({1: 'Yes', 0: 'No'})
+  student_df['Volunteering'] = student_df['Volunteering'].replace({1: 'Yes', 0: 'No'})
+  student_df['ParentalSupport'] = student_df['ParentalSupport'].replace({4: 'Very High', 3: 'High', 2: 'Moderate', 1: 'Low', 0: 'None'})
+  student_df['GradeClass'] = student_df['GradeClass'].replace({4.0: 'Grade F', 3.0: 'Grade D', 2.0: 'Grade C', 1.0: 'Grade B', 0.0: 'Grade A'})
 
+# Memanggil fungsi konversi numerik ke objek(string)
+convert_numerical_to_object()
+```
+Fungsi convert_numerical_to_object() pada bagian “Konversi nilai Numeric pada Column Categorical ke Object” bertujuan untuk mengubah kolom–kolom yang secara semula berisi kode angka (integer atau float) menjadi tipe data object dengan label yang lebih deskriptif. Ini sangat berguna untuk:
+- Mempermudah interpretasi saat eksplorasi data (bar-plot, pivot‐table, dsb.).
+- Menyiapkan data untuk encoding selanjutnya (label/one-hot encoding), karena algoritma visualisasi maupun beberapa library analisis lebih nyaman bekerja dengan string kategori.
+
+## Exploratory Data Analysis (EDA)
 ### Unvariative Analysis EDA
 #### Distribusi Categorical Column menggunakan Bar Plot
 
