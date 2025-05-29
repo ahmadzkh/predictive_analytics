@@ -1,7 +1,6 @@
 # Laporan Proyek Machine Learning - Ahmad Zaky Humami
 
 ## Domain Proyek
-
 Prestasi akademik siswa menjadi indikator penting bagi sekolah, orang tua, dan pembuat kebijakan untuk memahami efektivitas proses belajar–mengajar, mengalokasikan sumber daya, serta memberikan intervensi yang tepat waktu. Sejumlah penelitian menunjukkan bahwa faktor–faktor demografis (usia, jenis kelamin), kebiasaan belajar (lama belajar per minggu, kehadiran), serta dukungan sosial (bimbingan belajar, dukungan orang tua, kegiatan ekstrakurikuler) secara signifikan mempengaruhi hasil belajar siswa (Pei, 2023; Li & Wang, 2024). Di Indonesia, riset oleh Ambarita et al. (2024) dan Mentari & Nurhaeka (2024) juga mengonfirmasi peran faktor-faktor tersebut dalam memprediksi nilai akhir siswa SD dan SMA.
 
 Mengapa Masalah Ini Harus Diselesaikan?
@@ -14,23 +13,21 @@ Mengapa Masalah Ini Harus Diselesaikan?
 
 ## Business Understanding
 ### Problem Statements
-
 1. Bagaimana memprediksi kategori klasifikasi prestasi (GradeClass: A, B, C, D, F) siswa berdasarkan atribut demografis dan perilaku akademik mereka?
 2. Faktor manakah (misal GPA, jam belajar mingguan, absensi, dukungan orang tua, partisipasi ekstrakurikuler) yang paling berpengaruh terhadap prediksi GradeClass?
 3. Seberapa andal model machine learning (misalnya XGBoost, Random Forest) dalam memprediksi GradeClass—diukur melalui metrik accuracy, F1-score, dan confusion matrix—pada data testing yang terpisah?
 
 ### Goals
-
 1. Membangun model klasifikasi yang dapat mencapai ≥ 80 % accuracy pada data testing.
 2. Melihat Faktor penting yang mempengaruhi Grade Class
 3. Mengukur precision, recall, F1-score per kelas dan menghasilkan confusion matrix.
 
+## Data Understanding
 ### Sumber Data
 Pada proyek ini, kita menggunakan **Students Performance Dataset** yang diambil dari Kaggle. Dataset ini berisi data akademik dan demografis siswa sekolah menengah atas, dengan **1.000 baris** dan **12 kolom** fitur, antara lain usia, jam belajar per minggu, jumlah absensi, nilai GPA, partisipasi dalam bimbingan belajar, dukungan orang tua, dan keterlibatan dalam berbagai kegiatan ekstrakurikuler. Anda dapat mengunduh dataset lengkap di:  
 [Students Performance Dataset – Kaggle](https://www.kaggle.com/datasets/rabieelkharoua/students-performance-dataset/data)
 
 ### Target: **GradeClass**
-
 Variabel target **GradeClass** dikonstruksi dari nilai akhir (GPA) siswa dan dikelompokkan menjadi lima kategori, yaitu:
 
 - **Grade A**: Siswa dengan GPA ≥ 3.7  
@@ -41,7 +38,6 @@ Variabel target **GradeClass** dikonstruksi dari nilai akhir (GPA) siswa dan dik
 
 Kelima kategori inilah yang menjadi **target prediksi** model klasifikasi di proyek ini.  
 
-## Exploratory Data Analysis (EDA)
 ### Deskripsi Variabel
 Variabel | Keterangan
 ----------|----------
@@ -117,12 +113,32 @@ Jumlah duplikasi:  0
 Untuk Duplikasi Data
 - Hasil yang ditampilkan adalah 0, dengan demikian data tidak ada yang ganda (dupikat)
 
+#### Konversi nilai Numeric pada Column Categorical ke Object
+```
+# Mengganti nilai number kategori ke String Keterangan
+def convert_numerical_to_object ():
+  student_df['Gender'] = student_df['Gender'].replace({1: 'Wanita', 0: 'Pria'})
+  student_df['Extracurricular'] = student_df['Extracurricular'].replace({1:'Yes', 0:'No'})
+  student_df['Tutoring'] = student_df['Tutoring'].replace({1: 'Yes', 0: 'No'})
+  student_df['Music'] = student_df['Music'].replace({1: 'Yes', 0: 'No'})
+  student_df['Sports'] = student_df['Sports'].replace({1: 'Yes', 0: 'No'})
+  student_df['Volunteering'] = student_df['Volunteering'].replace({1: 'Yes', 0: 'No'})
+  student_df['ParentalSupport'] = student_df['ParentalSupport'].replace({4: 'Very High', 3: 'High', 2: 'Moderate', 1: 'Low', 0: 'None'})
+  student_df['GradeClass'] = student_df['GradeClass'].replace({4.0: 'Grade F', 3.0: 'Grade D', 2.0: 'Grade C', 1.0: 'Grade B', 0.0: 'Grade A'})
 
+# Memanggil fungsi konversi numerik ke objek(string)
+convert_numerical_to_object()
+```
+Fungsi convert_numerical_to_object() pada bagian “Konversi nilai Numeric pada Column Categorical ke Object” bertujuan untuk mengubah kolom–kolom yang secara semula berisi kode angka (integer atau float) menjadi tipe data object dengan label yang lebih deskriptif. Ini sangat berguna untuk:
+- Mempermudah interpretasi saat eksplorasi data (bar-plot, pivot‐table, dsb.).
+- Menyiapkan data untuk encoding selanjutnya (label/one-hot encoding), karena algoritma visualisasi maupun beberapa library analisis lebih nyaman bekerja dengan string kategori.
+
+## Exploratory Data Analysis (EDA)
 ### Unvariative Analysis EDA
 #### Distribusi Categorical Column menggunakan Bar Plot
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447391920-1de4fd14-0fe6-450d-8a12-99ce0ac40997.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjY5ODQsIm5iZiI6MTc0ODIyNjY4NCwicGF0aCI6Ii83NTc3MjY1OS80NDczOTE5MjAtMWRlNGZkMTQtMGZlNi00NTBkLThhMTItOTljZTBhYzQwOTk3LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyMzEyNFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWQ2MmVhMDRiZjFkZjcxZmFmYzVjZGEzZDYzN2E5ZDExNDZhZWU0MTFjYzlmNmI3MzExNmNhYmMzOTFiZTBhNGImWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.VIIzEY_c8alrCEfqWkFUNkNi996KtBLcyiiT23Vr9rw" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/5ebe6f6b-1228-433b-94bd-984a1ce4af48" width="500"/>
 </p>
 
 📊 Distribution of Student Gender:
@@ -136,8 +152,9 @@ Insight:
   - Ini mengindikasikan distribusi gender cukup seimbang, namun ada sedikit dominan wanita.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392151-73f4cd06-5c04-4757-b45c-1ab9c58a12ad.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjcxNTAsIm5iZiI6MTc0ODIyNjg1MCwicGF0aCI6Ii83NTc3MjY1OS80NDczOTIxNTEtNzNmNGNkMDYtNWMwNC00NzU3LWI0NWMtMWFiOWM1OGExMmFkLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyMzQxMFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTg1OGZkYzljNDY3NWY0NzFiZWE1MDhkYTJlNGRkZjkyMzA5ZTNjYjRlNWJiMTFiMDVjZDk3MTFlZjBkZjM0YjkmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.FKwITMfCPUAlnE8dUeSfGT2gj2NxMktBNcdxRfLMWbU" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/343d0596-ae59-4e60-82f8-a2555dc6c556" width="500"/>
 </p>
+
 
 📊 Distribution of Student Ethnicity:
 
@@ -153,7 +170,7 @@ Insight:
   - Kategori Other merupakan yang paling sedikit, menunjukkan keberagaman etnis yang relatif kecil.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392239-1f38eb8f-b927-4ec5-9bc1-38d5ea881dac.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjcyMjAsIm5iZiI6MTc0ODIyNjkyMCwicGF0aCI6Ii83NTc3MjY1OS80NDczOTIyMzktMWYzOGViOGYtYjkyNy00ZWM1LTliYzEtMzhkNWVhODgxZGFjLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyMzUyMFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTE5ODQ5ODkxODk0MTU3MWVjYzZkZWIyNjVlYjJlMWVlMGE4YWE3MzJkNjNlMGViOWJkZjJiZTQ1NGVlMWIxNGImWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.mSkAIofc77o3ZanyTQtY8QSjos8lQMF7Gmqi3E4oAOM" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/393f267f-6f67-4ba0-8949-3a4599d6f931" width="500"/>
 </p>
 
 📊 Distribution of Student Parental Education:
@@ -172,7 +189,7 @@ Insight:
   - Ini bisa berdampak pada pola dukungan dan pemahaman orang tua terhadap pendidikan anak.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392310-5bb96b6f-7a5e-43ec-9a50-34ad2fd50f7f.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjcyODAsIm5iZiI6MTc0ODIyNjk4MCwicGF0aCI6Ii83NTc3MjY1OS80NDczOTIzMTAtNWJiOTZiNmYtN2E1ZS00M2VjLTlhNTAtMzRhZDJmZDUwZjdmLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyMzYyMFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTYxZWI2YzAyZjg4YzlmNWQ4MjNkZTBlNWJmMDk4NmNmYzRlYzk1NDJjYzJjMmIxYzlkZmI5NDkyZmUzZTM0YjcmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.sB5HBt3lNLOQ5_E-Lk2ql4qNMEUUe4_XYN4sbFxsNlo" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/f179e136-bac6-4dfa-bac9-e46512729aac" width="500"/>
 </p>
 
 📊 Distribution of Student Tutoring
@@ -186,9 +203,8 @@ Insight:
   - Hanya sekitar 30% yang mengikuti program tutoring, selaras dengan statistik deskriptif sebelumnya (mean ≈ 0.3).
   - Hal ini dapat berpengaruh pada variasi prestasi akademik antar siswa.
 
-
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392415-3779c3ec-53a0-47c0-b26a-30c6e413544f.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjgxMDMsIm5iZiI6MTc0ODIyNzgwMywicGF0aCI6Ii83NTc3MjY1OS80NDczOTI0MTUtMzc3OWMzZWMtNTNhMC00N2MwLWIyNmEtMzBjNmU0MTM1NDRmLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTAwM1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTA3YTc0NDY0NGE4MjhkODM3MTJmMTEzZmYwNzU0MWNlMzI4ODkyYjVlZGE1MGM2YzY0ZjkwMDJmN2Y5ZmM4OTcmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.yHBnQJSZc3Jz1w11rYKxyDj2EGUmRHbKL6wq7hRU-qk" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/c2185450-ccbf-45cf-bb17-b42830c25f21" width="500"/>
 </p>
 
 📊 Distribution of Student Parental Support:
@@ -206,9 +222,8 @@ Insight:
   - Sekitar 200+ siswa tidak mendapatkan dukungan sama sekali dari orang tua, yang bisa menjadi indikator risiko terhadap prestasi akademik mereka.
   - Distribusi dukungan cukup beragam, menunjukkan adanya variasi signifikan dalam latar belakang keluarga siswa.
 
-
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392482-5554dc6c-c96f-4999-a6ce-79a2ed0e51e2.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjgxNDAsIm5iZiI6MTc0ODIyNzg0MCwicGF0aCI6Ii83NTc3MjY1OS80NDczOTI0ODItNTU1NGRjNmMtYzk2Zi00OTk5LWE2Y2UtNzlhMmVkMGU1MWUyLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTA0MFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWZiYzYyMjE0YzdiMmM1ZmZlOWI4NmQzNjEwYTM0YmJjNzQ2ZDUwOWRlYWRjYTE2ZTQwNTdhMzQ5ODA2NjI1NmMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.F31cq8CnqqJhJaEGsJ-2li1Y0cVqhcS5rWxZJuM7HF0" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/19b09ac1-3801-4b06-9226-0f7c304823c0" width="500"/>
 </p>
 
 📊 Distribution of Student Extracurricular:
@@ -223,7 +238,7 @@ Insight:
   - Perlu digali apakah partisipasi dalam ekstrakurikuler berdampak positif pada GPA atau prestasi lainnya.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392544-262d226d-b49e-4650-a56a-f2462211268a.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjgxODMsIm5iZiI6MTc0ODIyNzg4MywicGF0aCI6Ii83NTc3MjY1OS80NDczOTI1NDQtMjYyZDIyNmQtYjQ5ZS00NjUwLWE1NmEtZjI0NjIyMTEyNjhhLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTEyM1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWU5MDgxM2EyMmMwMDJhMmY4MTBjNDhmNTkzMmMwNjhjZTBhNGQ0YWQ2NWVjODQzMmIzODc0MjU5YTNkMzdkMDkmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.wtETv3jsT9pHKkkgh_vdOFrVnlcZMhAK-twXV-poGmM" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/d01ff743-85a8-485d-84fe-8f88828834b3" width="500"/>
 </p>
 
 📊 Distribution of Student Sports:
@@ -238,7 +253,7 @@ Insight:
   - Ini bisa berdampak pada keseimbangan fisik-mental siswa, karena olahraga berkontribusi pada kesehatan dan performa akademik.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392605-d12890b0-6d16-4314-8482-6b71ffd7e999.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjgyMTQsIm5iZiI6MTc0ODIyNzkxNCwicGF0aCI6Ii83NTc3MjY1OS80NDczOTI2MDUtZDEyODkwYjAtNmQxNi00MzE0LTg0ODItNmI3MWZmZDdlOTk5LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTE1NFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWVkMTkzNzU1NzBmYjNkNzg1YzM5ZGRjNTYwMTUwYzNmNjAwNzhiZmE4NDUyYTc3NmJhMGFjZTczMDNhNDM5MGYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.KWFqXWzYLv9yJif8Le0WDMLcz6VrXXOi3Z92IAV6ahA" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/9e6e0b5f-3fc6-4ae4-ac6b-a5dcd16eae5a" width="500"/>
 </p>
 
 📊 Distribution of Student Musics:
@@ -253,7 +268,7 @@ Insight:
   - Aktivitas musik seringkali berkorelasi dengan keterampilan kognitif dan kreativitas, sehingga bisa menjadi area untuk ditingkatkan.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392649-d4dc8037-9200-448d-91d1-3e43a7d0013c.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjgyNjUsIm5iZiI6MTc0ODIyNzk2NSwicGF0aCI6Ii83NTc3MjY1OS80NDczOTI2NDktZDRkYzgwMzctOTIwMC00NDhkLTkxZDEtM2U0M2E3ZDAwMTNjLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTI0NVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTAyZDg3NTFlZWFlZWNlNjI3ZWRlYTkzNDgwNWUxYmY3YzNhYjM3M2ViMTUxOTljZjIyM2RhMTlhMDQzOTIxZjEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.raOcaTSMwha3eSCtT9lk51kxf6jR1_J1FCuWWshub8Q" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/3fcfa29b-cb2c-4ea5-8016-c0eb873cbe8e" width="500"/>
 </p>
 
 📊 Distribution of Student Volunteering:
@@ -268,7 +283,7 @@ Insight:
   - Program sekolah bisa lebih mendorong siswa untuk ikut serta dalam volunteering.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392691-f36b38fd-184b-41b0-85b1-f71b82e16e17.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjgzMzksIm5iZiI6MTc0ODIyODAzOSwicGF0aCI6Ii83NTc3MjY1OS80NDczOTI2OTEtZjM2YjM4ZmQtMTg0Yi00MWIwLTg1YjEtZjcxYjgyZTE2ZTE3LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTM1OVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWVlN2RiYmQyZjk2NDdmODYzNjVkMmQ5MTM3MGJkZjE5ZjU1YWU3ZTA1NWVmYTlkYThkNWQ3ZmYwOTZkM2U5NDUmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.hfXkudSk8z_BH7nblWJEoEBmiuPNgPpxyrO43qXtv4M" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/931edb08-ca80-4252-ac7e-6536d9e4e946" width="500"/>
 </p>
 
 📊 Distribution of Student GradeClass:
@@ -288,7 +303,7 @@ Insight:
 #### Distribusi Numerical Column menggunakan Box Plot
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392914-6751beb7-5c10-42af-8acf-b8898bfd2eba.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjgzOTcsIm5iZiI6MTc0ODIyODA5NywicGF0aCI6Ii83NTc3MjY1OS80NDczOTI5MTQtNjc1MWJlYjctNWMxMC00MmFmLThhY2YtYjg4OThiZmQyZWJhLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTQ1N1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTYxOTgyZTNkYjlkMjQ4MTk0MTc1ZDRjOTE2NGYyNjAyZGI0Yjk0OGYyYTU4MzEwOGU1NmI0YTc1Mzg1NTg5MDgmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.hRjFdQgyYYQZYKgiA9Fkm78txRaEhqNZHbIuRJqu6cY" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/bd3b2ae4-c166-4e41-a9f9-945db7a247dc" width="500"/>
 </p>
 
 📊 Box Plot of Student Age:
@@ -299,7 +314,7 @@ Insight:
   - Tidak terdapat outlier, menandakan distribusi usia cukup normal untuk siswa SMA.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447392992-0086a488-cb84-4b01-910a-451d6caeceb8.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjg1NDUsIm5iZiI6MTc0ODIyODI0NSwicGF0aCI6Ii83NTc3MjY1OS80NDczOTI5OTItMDA4NmE0ODgtY2I4NC00YjAxLTkxMGEtNDUxZDZjYWVjZWI4LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTcyNVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPThlNjVlOGVlMTlmMWZmOTYyNTFkMDU3OTZkYzUyZTVkNGQ1NGMyYmYwNzM0OTc5NTg1YzRlYzk4ZTVjYjAxMDYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.zpX2VNvz_ZoC5Y4bjs0g6RZbG2Fb5uOYe2KBdkZlt4g" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/324743ee-0ad5-44d2-a42d-a5cb91a370e8" width="500"/>
 </p>
 
 📊 Box Plot of Weekly Study Time:
@@ -311,7 +326,7 @@ Insight:
   - Ini mengindikasikan bahwa sebagian besar siswa belajar sekitar 1-2 jam per hari secara konsisten.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447393060-571982de-98eb-41d0-8512-44bb6ba590f2.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjg1NzYsIm5iZiI6MTc0ODIyODI3NiwicGF0aCI6Ii83NTc3MjY1OS80NDczOTMwNjAtNTcxOTgyZGUtOThlYi00MWQwLTg1MTItNDRiYjZiYTU5MGYyLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTc1NlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTgzOGE2ODRkYmZhZDc2OTFhYzM3OTViYjgxMzAxMDg5NzY5ZmM5YmU4NWEzYTJiZjA1NGIxN2VlZTZmNmJjNjgmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.DcVFnciWhSPK8y9w0Vj9l9sFlnz972Ae0xDfTNZoKMk" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/22fe4f56-e901-4284-a860-97dbc4ab1a69" width="500"/>
 </p>
 
 📊 Box Plot of Student Absences:
@@ -323,7 +338,7 @@ Insight:
   - Ini bisa menjadi indikator penting: siswa dengan banyak absen kemungkinan memiliki GPA lebih rendah atau keterlibatan yang minim.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447393144-3979469a-498d-4f0d-aadd-45d8bcf327d3.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjg2MjUsIm5iZiI6MTc0ODIyODMyNSwicGF0aCI6Ii83NTc3MjY1OS80NDczOTMxNDQtMzk3OTQ2OWEtNDk4ZC00ZjBkLWFhZGQtNDVkOGJjZjMyN2QzLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTg0NVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWMwNDdiNTIyYTY1ZjE3MzBjNTI2ZWEwOTYzZGU1OWMyMjI1Y2RkYmM2NzNlNDQ5NWQ2NmRiYWU1MDU1NTg3Y2EmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.QSDXIuxHCKnqe39Q1QWwsbpBesO9AD8liqNjRe4QVC0" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/dcf561fb-7d6d-4f72-a81e-82e26378dfb9" width="500"/>
 </p>
 
 📊 Box Plot of Student GPA:
@@ -337,7 +352,7 @@ Insight:
 #### Membuat Pie Chart kolom GradeClass
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447393189-94d8c098-513e-48b4-a990-2b6ce725b959.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMjg2NDUsIm5iZiI6MTc0ODIyODM0NSwicGF0aCI6Ii83NTc3MjY1OS80NDczOTMxODktOTRkOGMwOTgtNTEzZS00OGI0LWE5OTAtMmI2Y2U3MjViOTU5LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAyNTkwNVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTA3Y2VmMDkyMjFkMzkzNzQ2MWYwMjBkNjJiZmVjYWQxZTU3MmM4YjY3MjFlZjY2ZjEwZjg5ODM5YzgwZDE3ZGQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.JfehEudZ4231KYqM_N3H_AoaHjujcuz3Iy_pfTasnQw" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/02fefa30-149d-4e08-b7c3-b2fa9b2c500c" width="500"/>
 </p>
 
 🔹 Distribution of Student GradeClass:
@@ -347,7 +362,7 @@ Insight:
 #### Membuat Histogram untuk Numerical Column
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447399651-e9c0b2ba-00b0-4752-88b9-ad186e126ea1.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzEyNDcsIm5iZiI6MTc0ODIzMDk0NywicGF0aCI6Ii83NTc3MjY1OS80NDczOTk2NTEtZTljMGIyYmEtMDBiMC00NzUyLTg4YjktYWQxODZlMTI2ZWExLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAzNDIyN1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTU1YWMyYTRlNzliMzA2N2I2YThhMmJjZjhiYzIxMDA5NTgzYjZmMmVkMzMyNzhmYWI5OWQzOTUyOWI1MmU5MmImWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.dgKuGWApAb-cuNNO_qX6MSwTZpHSGjxNY5UuM4F4Z1k" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/c869662f-356f-41b9-915a-12ad2e61220c" width="500"/>
 </p>
 
 📊 Distribution of Student Age:
@@ -356,7 +371,7 @@ Insight:
 - Distribusi tidak normal dan menunjukkan pola siklis, kemungkinan karena jumlah siswa di tiap tingkat/kelas hampir merata.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447399769-61913fce-25a9-44cc-a5c3-576f7acdf792.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzEyODIsIm5iZiI6MTc0ODIzMDk4MiwicGF0aCI6Ii83NTc3MjY1OS80NDczOTk3NjktNjE5MTNmY2UtMjVhOS00NGNjLWE1YzMtNTc2ZjdhY2RmNzkyLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAzNDMwMlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTAyNjI2ZTY3NzQwODIxMTI0OTgyZWNiNjRjMDAyZjBlZTJmNzAyYzdmOThiMWE5MzBjZTU2MWZiM2JiZmFhNGUmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.5b7UyCP_gxdPZcK2f_wQQAmLeoVH_efuKiG51szrcpc" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/a0fd4c50-1282-4c1d-b2d1-f5c3ce45c452" width="500"/>
 </p>
 
 ⏳ Distribution of Weekly Study Time:
@@ -365,7 +380,7 @@ Insight:
 - Masih ada sebagian kecil siswa yang belajar di bawah 5 jam atau di atas 15 jam, menunjukkan adanya variasi motivasi atau kebiasaan belajar.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447399830-d25860cf-899f-468a-9484-3e6637d270a3.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzEzMTEsIm5iZiI6MTc0ODIzMTAxMSwicGF0aCI6Ii83NTc3MjY1OS80NDczOTk4MzAtZDI1ODYwY2YtODk5Zi00NjhhLTk0ODQtM2U2NjM3ZDI3MGEzLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAzNDMzMVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWI5NGY5ZDI4YTRhY2JhNzNmZGI5M2JkYmMyYmJmYzM1MWUzYWQ2ZWUwZTJjNzMyODg2NGQ4NDRjNDljNjBiN2UmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.C4SCGiiCcON86TRJIxJ8qiZjYXNs7vXc6HrS4uS-U_0" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/fa87c5eb-b799-4246-95db-0d9828ec7d2c" width="500"/>
 </p>
 
 📅 Distribution of Student Absences:
@@ -374,7 +389,7 @@ Insight:
 - Hal ini bisa menjadi indikator potensi masalah kehadiran atau disiplin siswa.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447399901-92b0cbc1-542f-4f28-b85e-1f4b25fb6e23.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzEzNjMsIm5iZiI6MTc0ODIzMTA2MywicGF0aCI6Ii83NTc3MjY1OS80NDczOTk5MDEtOTJiMGNiYzEtNTQyZi00ZjI4LWI4NWUtMWY0YjI1ZmI2ZTIzLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAzNDQyM1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTFkN2IxNDBmZTM4NWRmNzcxNDRhZGE0NjQ2NzFhZmM4NmFlOGZjNGMxOGNhNjA1NzE2MTYyMmM1M2ZmOTY1NWMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.mcQYliaGmHlxhZ4HrgHbkQu4VawQK_OxX0_mVJJ2Ncg" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/1a76a720-2f02-4dc9-9296-91eecebe56d7" width="500"/>
 </p>
 
 🏅 Distribution of Student GPA:
@@ -391,7 +406,7 @@ Insight:
 #### Ananlisis data pada fitur numerik `StudyTimeWeekly` dengan `GPA`
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447399942-8b0b42d9-fc98-490a-ac2b-99607b395654.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzE0ODksIm5iZiI6MTc0ODIzMTE4OSwicGF0aCI6Ii83NTc3MjY1OS80NDczOTk5NDItOGIwYjQyZDktZmM5OC00OTBhLWFjMmItOTk2MDdiMzk1NjU0LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAzNDYyOVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTQxNWY0MDBkOGNlNDdjNTYwNjIwZThmNDRmZDU4ZjMxM2M4ZjFmYTE1YjRmMDU5NzE0M2IxNTkwODIyMjJiODcmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.Bi_gD-zoCnJ1j-FKEhnheyhyLksafJ3RoDK2wDMauY4" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/4629642c-7725-446b-9d5c-3a43ce2b6cb5" width="500"/>
 </p>
 
 📉 Impact of Study Time Every Week on GPA:
@@ -407,21 +422,7 @@ Insight:
 #### Ananlisis data pada fitur numerik `Absence` dengan `GPA`
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447400023-4f2e1ce9-3b35-44b8-b86b-feb89bd758b9.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzE1MjIsIm5iZiI6MTc0ODIzMTIyMiwicGF0aCI6Ii83NTc3MjY1OS80NDc0MDAwMjMtNGYyZTFjZTktM2IzNS00NGI4LWI4NmItZmViODliZDc1OGI5LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAzNDcwMlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTFmMjVjMmE3OTdmOGQ0Y2E2Y2Y1NGRjNzRmYjk5MDIxMWI3NDI4MGY1OTg1MTQ4M2NkMGQwODc5YjcxODkwYzcmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.6rHOJnWdZbeVE98YFdjctIfRW2xAyXqVesWKRjbJaAo" width="1000"/>
-</p>
-
-📉 Impact of Absence on GPA:
-- Sumbu X: Jumlah Absen
-- Sumbu Y: GPA
-- Garis Merah: Garis regresi linier
-
-Insight:
-- Terdapat korelasi negatif kuat: semakin banyak absen, semakin rendah GPA.
-- Kemiringan garis regresi negatif tajam, menandakan hubungan yang signifikan.
-- Data cukup konsisten menurun dari kiri ke kanan - semakin sering siswa tidak hadir, prestasinya cenderung menurun secara konsisten.
-
-<p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447400023-4f2e1ce9-3b35-44b8-b86b-feb89bd758b9.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzE1MjIsIm5iZiI6MTc0ODIzMTIyMiwicGF0aCI6Ii83NTc3MjY1OS80NDc0MDAwMjMtNGYyZTFjZTktM2IzNS00NGI4LWI4NmItZmViODliZDc1OGI5LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDAzNDcwMlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTFmMjVjMmE3OTdmOGQ0Y2E2Y2Y1NGRjNzRmYjk5MDIxMWI3NDI4MGY1OTg1MTQ4M2NkMGQwODc5YjcxODkwYzcmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.6rHOJnWdZbeVE98YFdjctIfRW2xAyXqVesWKRjbJaAo" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/29d1ab68-9901-493a-92ec-bf2a132a34a5" width="500"/>
 </p>
 
 📉 Impact of Absence on GPA:
@@ -437,7 +438,7 @@ Insight:
 #### Ananlisis data pada fitur kategori `Tutoring` dengan `Grade Class`
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447411281-b1f61485-3073-47f5-8c88-a1845a2568a1.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzMyMTcsIm5iZiI6MTc0ODIzMjkxNywicGF0aCI6Ii83NTc3MjY1OS80NDc0MTEyODEtYjFmNjE0ODUtMzA3My00N2Y1LThjODgtYTE4NDVhMjU2OGExLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA0MTUxN1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWIxODJiNmQzMWEzMTQxNTNlOTU2YTZkZGM5MjUzODRjNmJiYWZkYzUyMjQ3YjUyNjFjMzBjM2Q4NjhiZGI4ZWMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.cUpYE1H2Ny0NoT0tYEGNmGIZaqs8xAQLtoRKdXZ-bec" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/4c94f030-3647-4902-837c-3674a59e0a1a" width="500"/>
 </p>
 
 📊 Comparison of Tutoring on GPA:
@@ -448,7 +449,7 @@ Insight:
 #### Ananlisis data pada fitur kategori `Gender` dengan  `Grade Class`
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447412071-1e5f09d1-b424-43c9-b677-4f6f002dc670.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzM1MjYsIm5iZiI6MTc0ODIzMzIyNiwicGF0aCI6Ii83NTc3MjY1OS80NDc0MTIwNzEtMWU1ZjA5ZDEtYjQyNC00M2M5LWI2NzctNGY2ZjAwMmRjNjcwLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA0MjAyNlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWJjODE5MjZiMjk5M2RjNmE3MmVlNzYyNjM4MWE5NmFlNDg4MGI1ZTdlOGZkNzBkNzdhNjMzZTE1ZmZlYTg3MDEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.H1Od5mqXo1KC6zY9rbp1rpBSdTF-I6AEr7JOQ_ZAdNY" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/2f94dc5e-6e77-42f5-9a3c-b351c3134e53" width="500"/>
 </p>
 
 📊 Comparison of Tutoring on GPA:
@@ -459,7 +460,7 @@ Insight:
 #### Ananlisis data pada fitur kategori kegiatan non akademik `Extracurricular`, `Sports`, `Music`, `Volunteering` dengan `GPA`
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447412253-a4a52d4f-e607-491e-8844-6a18be41846a.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzM1OTEsIm5iZiI6MTc0ODIzMzI5MSwicGF0aCI6Ii83NTc3MjY1OS80NDc0MTIyNTMtYTRhNTJkNGYtZTYwNy00OTFlLTg4NDQtNmExOGJlNDE4NDZhLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA0MjEzMVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWJmZmFiNmNjNzkxZDAyMGZmM2ZlOWI2ODgyYWE5NDMwYjdhOGExZTY3ZjI1ZTQ0ZmI1YjE2ZWIyOGExNGEwNmYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.HPUmcC9OIBmmXraSyc3zwkEXj6Rlwr432Z7ddzDsQqs" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/3f955da7-b363-4446-97a9-642a72f4c434" width="500"/>
 </p>
 
 📊 Impact of Extracurricular on GPA:
@@ -471,7 +472,7 @@ Kesimpulan:
 - Extracurricular membangun soft skills seperti tanggung jawab, kerjasama, dan kepemimpinan.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447412675-ed0ea1ac-6585-428a-9076-afcca0346bd4.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzM3MjcsIm5iZiI6MTc0ODIzMzQyNywicGF0aCI6Ii83NTc3MjY1OS80NDc0MTI2NzUtZWQwZWExYWMtNjU4NS00MjhhLTkwNzYtYWZjY2EwMzQ2YmQ0LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA0MjM0N1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTNjNzRjNzk4YmYzODZkMzQ0MGE2ZTM2Y2IyMTUyYjQ1ZmQ4M2ZhNTdkZjAyMTUzMDk2NTMyNmU1NWVkYThjNGMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.Y_koI9xLOPSUJY19ebuWAGK9wOaJt8iXB7aERneIR-s" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/594351ad-957b-4f72-9073-c575538bb43e" width="500"/>
 </p>
 
 📊 Impact of Sports Participation on GPA:
@@ -483,7 +484,7 @@ Kesimpulan:
   - Namun, beban latihan yang tinggi mungkin juga mengurangi waktu belajar jika tidak dikelola dengan baik.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447412823-fbd229af-f8e4-46c4-bf41-53cdcfe674dc.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzM3NzAsIm5iZiI6MTc0ODIzMzQ3MCwicGF0aCI6Ii83NTc3MjY1OS80NDc0MTI4MjMtZmJkMjI5YWYtZjhlNC00NmM0LWJmNDEtNTNjZGNmZTY3NGRjLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA0MjQzMFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWI4YjhkZGVlMmU3NzQ2ZDgzMGZkNGMyNGE2NzYyNzNmNDM3ZGVhZDVhMTkzYTFkMDUyOGNkNmU0Y2RiNzg2NTgmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.m7kg6NqzCE2TMbLQ6ktfdd35N6hDO-S7QJ8eI0LglLs" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/8e010bb8-ffe5-49f7-8881-2606dae4eeaa" width="500"/>
 </p>
 
 📊 Impact of Music on GPA:
@@ -495,7 +496,7 @@ Kesimpulan:
 - Musik juga mendukung perkembangan memori dan pemrosesan kognitif.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447412968-39b0d4b0-3ee3-47f7-ace7-e7ed017173ff.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzM4MTQsIm5iZiI6MTc0ODIzMzUxNCwicGF0aCI6Ii83NTc3MjY1OS80NDc0MTI5NjgtMzliMGQ0YjAtM2VlMy00N2Y3LWFjZTctZTdlZDAxNzE3M2ZmLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA0MjUxNFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTk3YTIxMjhiYzQ4MjE2YzQ1M2FhMTY4ZDY0ODQ0NjA4ZDM4MGI5ZWE2NWViY2IyYmI3ODA0ZjZhMDY3ZmIzODQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.EPFPoKEtV9-gcxtJ5QRjplK_5I7MC2wAg5Ye8QcSXYA" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/fb02c33e-e0a7-4c26-9f54-a9e59f3a354f" width="500"/>
 </p>
 
 📊 Impact of Volunteering Participation on GPA:
@@ -509,7 +510,7 @@ Kesimpulan:
 #### Ananlisis data pada fitur kategori `ParentalSupport` dengan `GradeClass`
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447413868-f682991c-e26d-4476-b41f-79783bce389a.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzQxMjEsIm5iZiI6MTc0ODIzMzgyMSwicGF0aCI6Ii83NTc3MjY1OS80NDc0MTM4NjgtZjY4Mjk5MWMtZTI2ZC00NDc2LWI0MWYtNzk3ODNiY2UzODlhLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA0MzAyMVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTczOWJhMDBmYTVjZjE5OGQ1NGUxZmM4ZmRiODdiOTY2ODk4YTE2NTY0MDVlMzhiZjM0ZjBjNDFmMDBlNjdjZDYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.e30U7xkhGwn0J_8vQl_gLZUd5xDV0kWzQwFDPEgxydQ" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/30a8550f-9828-4caf-984c-2cc48041f977" width="500"/>
 </p>
 
 📊 Impact of Parental Support on GPA
@@ -535,7 +536,7 @@ Kesimpulan:
 #### Melihat korelasi variabel numerik dengan menggunakan `Heatmap`
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447414361-2a1f2155-12bd-4c0a-9bab-faa34a83a2a6.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzQyODYsIm5iZiI6MTc0ODIzMzk4NiwicGF0aCI6Ii83NTc3MjY1OS80NDc0MTQzNjEtMmExZjIxNTUtMTJiZC00YzBhLTliYWItZmFhMzRhODNhMmE2LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA0MzMwNlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTBhZTlmZTYxOWUxMmNiOGY3MDhmYWFjMTg1N2Q0YTczOGQ1NDgzMDVhYjhkOWY3MzI5ODNiYTVlNDUyZGNjYzYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.8GcVIt1Z41bt0PpQATMaoZfGrutQgm3uOL7GdmXTFig" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/39a850ad-8c73-4381-b571-46c6fd4fa2f9" width="500"/>
 </p>
 
 📊 Numerical Variable Correlation Heatmap:
@@ -560,7 +561,7 @@ Kesimpulan:
 #### Melihat `Plot Scatter` yang Memiliki Nilai Korelasi Positif dan Negatif
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447414559-0327a20e-7127-429a-aa7f-83a3fb401b87.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzQzNTMsIm5iZiI6MTc0ODIzNDA1MywicGF0aCI6Ii83NTc3MjY1OS80NDc0MTQ1NTktMDMyN2EyMGUtNzEyNy00MjlhLWFhN2YtODNhM2ZiNDAxYjg3LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA0MzQxM1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTZjNmY4YWQ5YTJlMjY5MDQyYjRiZjg3ZjdlNjM4MmNkMGZiOWIyNmYzMzJlZjNiMzUzODM1MDQ5YTc3NWYxYzQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.Nilq-5m7VXrLA73gLXZB12ZC55MoZ-hfEw72jARaCDs" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/ba2b3ec5-eacc-44f3-a5c5-258b972a1afc" width="500"/>
 </p>
 
 Insight:
@@ -569,7 +570,7 @@ Insight:
 - Data cukup konsisten menurun dari kiri ke kanan - semakin sering siswa tidak hadir, prestasinya cenderung menurun secara konsisten.
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447415162-1aa5c8b9-30ec-463d-a55c-502d62c3aa66.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzQ1MzksIm5iZiI6MTc0ODIzNDIzOSwicGF0aCI6Ii83NTc3MjY1OS80NDc0MTUxNjItMWFhNWM4YjktMzBlYy00NjNkLWE1NWMtNTAyZDYyYzNhYTY2LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA0MzcxOVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTNmNzI2ZDgxZjgzYmJkMjk1YzQ0MWI0YmMyNTRiYjNjZDZkYWQwNDIwOTM0ZjA5NDMxMTI1NzI3ZDQ3ZDA5MDQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.V5T-5ttfXfTmUE99wrIlaQ-bRLWJsU2JCuuR4ZS2d_Q" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/1517fb54-6623-458d-988e-7ac30a02bd04" width="500"/>
 </p>
 
 Insight:
@@ -724,11 +725,10 @@ Kelemahan:
 - Sedikit kesulitan dalam mengenali Grade A (13 benar, 8 salah), cukup tinggi untuk kategori ini.
 - Ada kesalahan minor seperti Grade B - Grade F (4 kasus).
 
-
 ### Model XGBoost
-Lanjut algoritma kedua yang saya gunakan adalah Extreme Gradient Boosting (XGBoost) karena dikenal sangat kuat untuk tugas klasifikasi dan regresi. Saya mengimplementasikannya dengan `XGBClassifier` dari library `xgboost`, melatih model menggunakan `x_train` dan `y_train`, lalu mengujinya dengan `x_test` dan `y_test`.
+Lanjut algoritma kedua yang saya gunakan adalah Extreme Gradient Boosting (XGBoost) karena dikenal sangat kuat untuk tugas klasifikasi dan regresi. XGBoost (Extreme Gradient Boosting) adalah algoritma boosting berbasis pohon keputusan yang membangun model secara iteratif. Pada setiap iterasi, XGBoost membuat pohon baru yang belajar untuk “memperbaiki” kesalahan residu dari model sebelumnya dengan meminimalkan fungsi loss (biasanya log-loss untuk klasifikasi) ditambah regularisasi untuk mencegah overfitting. Pembaruan bobot dilakukan menggunakan gradient descent pada loss function—sehingga setiap pohon baru diarahkan untuk menurunkan gradien loss secara optimal. Teknik ini menghasilkan model ensemble yang sangat kuat dengan kemampuan menangani missing value dan interaksi fitur kompleks secara otomatis. 
 
-Saya mengatur beberapa parameter penting: `max_depth = 6`, `n_estimators = 125`, `random_state = 30`, `learning_rate = 0.01`, dan `n_jobs = -1` untuk memaksimalkan performa dan efisiensi model.
+Saya mengimplementasikannya dengan `XGBClassifier` dari library `xgboost`, melatih model menggunakan `x_train` dan `y_train`, lalu mengujinya dengan `x_test` dan `y_test`. Dan saya mengatur beberapa parameter penting: `max_depth = 6`, `n_estimators = 125`, `random_state = 30`, `learning_rate = 0.01`, dan `n_jobs = -1` untuk memaksimalkan performa dan efisiensi model.
 
 Kelebihan:
 - Meningkatkan akurasi pada Grade A (16 benar, hanya 5 salah), lebih baik dibandingkan Random Forest.
@@ -738,12 +738,10 @@ Kelebihan:
 Kelemahan:
 - Hampir tidak ada, distribusi kesalahan sangat minim dan merata.
 
-
-
 ### Model SVM
-Saya juga menggunakan Support Vector Machine (SVM) sebagai model ketiga. SVM merupakan algoritma yang efektif untuk klasifikasi, terutama dalam kasus dimana data memiliki struktur yang kompleks. Saya menggunakan `SVC` dari library `sklearn.svm` untuk melatih model dengan `x_train` dan `y_train`, lalu mengujinya dengan `x_test` dan `y_test`.
+Dan Algoritma ketiga yaitu, Support Vector Machine (SVM) dimana algoritma ini akan membangun sebuah hyperplane di ruang fitur berdimensi tinggi yang memaksimalkan margin, yaitu jarak terdekat antara hyperplane dengan data training terdekat (support vectors). Dengan kernel trick (mis. RBF), SVM dapat memetakan data non-linier ke ruang berdimensi lebih tinggi, di mana pemisahan linear menjadi mungkin. Pada prediksi, SVM menentukan sisi hyperplane mana sebuah titik data berada, sehingga secara efisien memisahkan kelas—cocok untuk dataset dengan pola batas keputusan yang kompleks. SVM merupakan algoritma yang efektif untuk klasifikasi, terutama dalam kasus dimana data memiliki struktur yang kompleks. 
 
-Saya mengatur beberapa parameter penting: `kernel = "rbf"`, `gamma = "auto"`, `random_state = 50` untuk memastikan hasil yang konsisten.
+Saya menggunakan `SVC` dari library `sklearn.svm` untuk melatih model dengan `x_train` dan `y_train`, lalu mengujinya dengan `x_test` dan `y_test`. Saya mengatur beberapa parameter penting: `kernel = "rbf"`, `gamma = "auto"`, `random_state = 50` untuk memastikan hasil yang konsisten.
 
 Kelebihan:
 - Masih mampu mengenali Grade F (229 benar) dan Grade C (56 benar) dengan baik.
@@ -754,7 +752,9 @@ Kelemahan:
 - Banyak prediksi Grade D salah ke Grade F (16 kasus).
 
 ### Model Naive Bayes
-Model keempat yang saya gunakan adalah Naive Bayes. Meskipun namanya "naif", Naive Bayes telah terbukti efektif dalam banyak kasus klasifikasi . Saya menggunakan `GaussianNB` dari library `sklearn.naive_bayes` untuk melatih model dengan `x_train` dan `y_train`, lalu menguji dengan `x_test` dan `y_test`. Saya mengatur parameter `var_smoothing=1e-9` untuk mengatasi masalah numeriik.
+Model keempat yang saya gunakan yaitu, Naive Bayes adalah classifier probabilistik yang menerapkan Teorema Bayes dengan asumsi independence antar fitur. Untuk setiap kelas `𝐶`, model menghitung probabilitas posterior `𝑃(𝐶∣𝑥)∝𝑃(𝐶)∏𝑖𝑃(𝑥𝑖∣𝐶)`, di mana `𝑃(𝐶)` adalah prior kelas dan `𝑃(𝑥𝑖∣𝐶)` bisa dihitung (misal dengan distribusi Gaussian untuk continuous data). Meskipun *naif* karena mengabaikan korelasi fitur, pendekatan ini sangat cepat, hemat memori, dan sering memberikan baseline yang kuat untuk klasifikasi teks atau data tabular berskala besar.
+
+Naive Bayes. Meskipun namanya "naif", Naive Bayes telah terbukti efektif dalam banyak kasus klasifikasi. Saya menggunakan `GaussianNB` dari library `sklearn.naive_bayes` untuk melatih model dengan `x_train` dan `y_train`, lalu menguji dengan `x_test` dan `y_test`. Saya mengatur parameter `var_smoothing=1e-9` untuk mengatasi masalah numeriik.
 
 Kelebihan:
 - Cukup baik untuk prediksi Grade C (61) dan Grade D (65).
@@ -767,7 +767,7 @@ Kelemahan:
 ### Model Terbaik
 
 <p align="center">
-  <img src="https://private-user-images.githubusercontent.com/75772659/447427933-dbac394b-9e12-4dc3-996d-b9a7a025c6ec.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzgyNTksIm5iZiI6MTc0ODIzNzk1OSwicGF0aCI6Ii83NTc3MjY1OS80NDc0Mjc5MzMtZGJhYzM5NGItOWUxMi00ZGMzLTk5NmQtYjlhN2EwMjVjNmVjLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA1MzkxOVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWVmNmMwY2YxNzc1MWI2MmE0NzU0MzMzMjQ0NzUwNWRjYTRkZmYwMTRjNTNkZGYyYTY3YmRlMGUwYjIzNGU0NzYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.Bo4xkcikbUa__Ur6llfi8XkKsMiZpLWWK9mkn0c2xlE" width="1000"/>
+  <img src="https://github.com/user-attachments/assets/a275fed6-04df-4d50-8dd5-136c6a155d69" width="500"/>
 </p>
 
 |index|Model|Accuracy|
@@ -823,7 +823,7 @@ Setelah membentuk confusion matrix, saya menggunakan empat metrik utama untuk me
 ### Implementasi Confussion Matrix
 #### Confussion Matrix Random Forest
 <p align="center">
-    <img src="https://private-user-images.githubusercontent.com/75772659/447432682-ee6b86fa-c3dc-44f6-b0b2-d5348100a246.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzkzNjMsIm5iZiI6MTc0ODIzOTA2MywicGF0aCI6Ii83NTc3MjY1OS80NDc0MzI2ODItZWU2Yjg2ZmEtYzNkYy00NGY2LWIwYjItZDUzNDgxMDBhMjQ2LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA1NTc0M1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWZlYjQ1YmZjMmJlYjA1ZTcxZWNkMWVmMGFlNGM5MGI1ZDM5NWMyMjJmYjQwOGYyNTg2NmEwZjFmNmI0ODBkNDQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.Oji8XotJK_ViJ6ZwvF_DOg5R_4Ohexg8TQrdndhKMm8" width="500"/>
+    <img src="https://github.com/user-attachments/assets/b3ec8727-e38c-4da4-aea5-7867b1e361c7" width="500"/>
 </p>
 
 Dan berikut adalah `classification_report` model Random Forest:
@@ -848,8 +848,9 @@ Insight:
 > Random Forest memberikan performa stabil dan akurat, terutama untuk kelas dengan jumlah data besar seperti Grade F. Namun masih ada sedikit kebingungan antar kelas yang berdekatan (A - B, D - C), meskipun tidak signifikan.
 
 #### Confussion Matrix XGBoost
+
 <p align="center">
-    <img src="https://private-user-images.githubusercontent.com/75772659/447434093-e6b92dc5-5ca3-4c4d-9b71-433215830214.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzk3MjEsIm5iZiI6MTc0ODIzOTQyMSwicGF0aCI6Ii83NTc3MjY1OS80NDc0MzQwOTMtZTZiOTJkYzUtNWNhMy00YzRkLTliNzEtNDMzMjE1ODMwMjE0LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA2MDM0MVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWEzMGIyNWMzN2QxZjY2Y2JlNmQ2OGMzMThhNzEwYzkzOGY0MjlhMjU1OGIwOWZkYzA3NWQxZWI0NjhlYWE3ZjQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.nHHXR3RBtH5HsnVmE7PgCsnVOk3ngjcTxSR1Gyxg3Rk" width="500"/>
+    <img src="https://github.com/user-attachments/assets/d32222ed-2260-42d3-ae10-7e1af7436b7c" width="500"/>
 </p>
 
 Dan berikut adalah `classification_report` model XGBoost:
@@ -873,8 +874,9 @@ Insight:
 > XGBoost memberikan hasil paling stabil dan presisi tinggi di antara semua model. Hampir tidak ada label yang benar-benar membingungkan model, menandakan pemisahan fitur yang efektif. Ini menandakan XGBoost kemungkinan adalah model terbaik dari keempatnya untuk kasus ini.
 
 #### Confussion Matrix SVM
+
 <p align="center">
-    <img src="https://private-user-images.githubusercontent.com/75772659/447434519-38583f9f-7292-4f4f-b3c3-fbe011429038.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzk4MTgsIm5iZiI6MTc0ODIzOTUxOCwicGF0aCI6Ii83NTc3MjY1OS80NDc0MzQ1MTktMzg1ODNmOWYtNzI5Mi00ZjRmLWIzYzMtZmJlMDExNDI5MDM4LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA2MDUxOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTY4YjRlYWE0NTE0Yzc0YzNlMDJiNjU4ZWIwNGZmNDgxNWFjZDQ1MjJiNDBjZjQxMTJmMzhiYTljYTY1MDhlODgmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.Vkcr0_BRnemWvtTe0L6SAlYIkSnBLZtB4sgQCMrYL2Q" width="500"/>
+    <img src="https://github.com/user-attachments/assets/fd98189a-0ef7-4c98-975c-81a711a38839" width="500"/>
 </p>
 
 Dan berikut adalah `classification_report` model SVM:
@@ -898,8 +900,9 @@ Insight:
 > SVM tampaknya mengalami overlap antar kelas tengah (B-C-D). Hal ini mengindikasikan bahwa decision boundary SVM tidak bekerja optimal di dataset ini—kemungkinan karena distribusi data tidak linier atau kurang terpisah dengan jelas.
 
 #### Confussion Matrix Naive Bayes
+
 <p align="center">
-    <img src="https://private-user-images.githubusercontent.com/75772659/447434916-f1635d71-3d42-4bf9-912a-bb54b3159516.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyMzk5MTUsIm5iZiI6MTc0ODIzOTYxNSwicGF0aCI6Ii83NTc3MjY1OS80NDc0MzQ5MTYtZjE2MzVkNzEtM2Q0Mi00YmY5LTkxMmEtYmI1NGIzMTU5NTE2LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA2MDY1NVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTY0OWRlMzNjMTM5NDA5MmUzZjYxOTNjZWU2YzQxMjQzYWExMTJhYjRmNmRkMzllMzUwYTY4ZjMwODE0ZjBkNDUmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.SUIQa_g7cJTHip2yl9kfhYYVFP95gU_NZGrt_Ihe-08" width="500"/>
+    <img src="https://github.com/user-attachments/assets/429a97b8-dc9f-45ae-a7f3-9f533588f25e" width="500"/>
 </p>
 
 Dan berikut adalah `classification_report` model Naive Bayes:
@@ -927,8 +930,9 @@ Insight:
 
 ## Kesimpulan
 ### 1. Faktor yang berpengaruh terhadap Student Grade Class
+
 <p align="center">
-    <img src="https://private-user-images.githubusercontent.com/75772659/447445189-13576eb4-4b00-4cf8-949a-2736e02ddcd6.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDgyNDIwODcsIm5iZiI6MTc0ODI0MTc4NywicGF0aCI6Ii83NTc3MjY1OS80NDc0NDUxODktMTM1NzZlYjQtNGIwMC00Y2Y4LTk0OWEtMjczNmUwMmRkY2Q2LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTI2VDA2NDMwN1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTE1NjZiZTE3ZGQ1MGU4ZTI2MmQ5MDVhMDBmZmQxZDA3ZWI5MmI1ZmQ0NjE4NGZmYTczZmE0MGFmNjY1YTU1NTQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.4VHC5B8uaABK3fAB_8rahgHEVk7dbvEDnm_N8CkGzzc" width="500"/>
+    <img src="https://github.com/user-attachments/assets/83ae436a-53cb-4920-a7a5-4d7b612a318d" width="500"/>
 </p>
 
 - GPA adalah prediktor paling kuat untuk menentukan prestasi siswa ke depan.
