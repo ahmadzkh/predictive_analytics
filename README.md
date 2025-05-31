@@ -24,7 +24,7 @@ Mengapa Masalah Ini Harus Diselesaikan?
 
 ## Data Understanding
 ### Sumber Data
-Pada proyek ini, kita menggunakan **Students Performance Dataset** yang diambil dari Kaggle. Dataset ini berisi data akademik dan demografis siswa sekolah menengah atas, dengan **1.000 baris** dan **12 kolom** fitur, antara lain usia, jam belajar per minggu, jumlah absensi, nilai GPA, partisipasi dalam bimbingan belajar, dukungan orang tua, dan keterlibatan dalam berbagai kegiatan ekstrakurikuler. Anda dapat mengunduh dataset lengkap di:  
+Pada proyek ini, kita menggunakan **Students Performance Dataset** yang diambil dari Kaggle. Dataset ini berisi data akademik dan demografis siswa sekolah menengah atas, dengan **2392 baris** dan **15 kolom** fitur, antara lain usia, jam belajar per minggu, jumlah absensi, nilai GPA, partisipasi dalam bimbingan belajar, dukungan orang tua, dan keterlibatan dalam berbagai kegiatan ekstrakurikuler. Anda dapat mengunduh dataset lengkap di:  
 [Students Performance Dataset – Kaggle](https://www.kaggle.com/datasets/rabieelkharoua/students-performance-dataset/data)
 
 ### Target: **GradeClass**
