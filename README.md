@@ -579,11 +579,11 @@ Insight:
 - Sebaran data sangat menyebar, menunjukkan banyak variabel lain yang memengaruhi GPA selain waktu belajar.
 
 ## Data Preparation
-Pada bagian ini Anda menerapkan dan menyebutkan teknik data preparation yang dilakukan. Teknik yang digunakan pada notebook dan laporan harus berurutan.
+Pada tahap ini kita akan melakukan proses transformasi pada data sehingga menjadi bentuk yang cocok untuk proses pemodelan. Ada beberapa tahap persiapan data perlu dilakukan, yaitu:
 
-**Rubrik/Kriteria Tambahan (Opsional)**: 
-- Menjelaskan proses data preparation yang dilakukan
-- Menjelaskan alasan mengapa diperlukan tahapan data preparation tersebut.
+1. Cleaning Data.
+2. Encoding Categorical Feature.
+3. Data Spliting.
 
 ### Cleaning Data
 Melakukan drop column `StudentID`, `Ethnicity` dan `ParentalEducation`.
